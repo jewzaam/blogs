@@ -2,24 +2,36 @@ TESTTARGETS := $(shell go list -e ./... | egrep -v "/(vendor)/")
 # ex, -v
 TESTOPTS :=
 
+GO111MODULE?=on
+
 default: gobuild
 
-Gopkg.lock:
-	rm -f Gopkg.toml
-	dep init
+.PHONY: gomodhack
+gomodhack:
+	GO111MODULE=on go get -d github.com/openshift/client-go/operator/informers/externalversions@master
+	GO111MODULE=on go get -d github.com/openshift/api@master
+	GO111MODULE=on go get -d github.com/openshift/api/config/v1@master
+	GO111MODULE=on go get -d github.com/openshift/api/operator/v1alpha1@master
+	GO111MODULE=on go get -d github.com/openshift/client-go/config/clientset/versioned@master
+	GO111MODULE=on go get -d github.com/openshift/client-go/config/clientset/versioned/typed/config/v1@master
+	GO111MODULE=on go get -d github.com/openshift/client-go/config/informers/externalversions@master
+	GO111MODULE=on go get -d github.com/openshift/client-go/config/informers/externalversions/config/v1@master
+	GO111MODULE=on go get -d github.com/openshift/client-go/config/listers/config/v1@master
+	GO111MODULE=on go get -d github.com/openshift/client-go/operator/clientset/versioned@master
 
-vendor: Gopkg.lock
-	dep ensure -v
+.PHONY: gomodtidy
+gomodtidy:
+	GO111MODULE=${GO111MODULE} go mod tidy
 
 .PHONY: gocheck
-gocheck:
-	gofmt -s -w $(shell go list -f '{{ .Dir }}' ./... )
-	go vet $(shell go list -f '{{ .Dir }}' ./... )
+gocheck: gomodtidy
+	GO111MODULE=${GO111MODULE} gofmt -s -w $(shell go list -f '{{ .Dir }}' ./... )
+	GO111MODULE=${GO111MODULE} go vet $(shell go list -f '{{ .Dir }}' ./... )
 
 .PHONY: gotest
 gotest:
-	go test $(TESTOPTS) $(TESTTARGETS)
+	GO111MODULE=${GO111MODULE} go test $(TESTOPTS) $(TESTTARGETS)
 
 .PHONY: gobuild
-gobuild: vendor gocheck gotest
-	go build $(shell go list -f '{{ .Dir }}' ./... )
+gobuild: gocheck gotest
+	GO111MODULE=${GO111MODULE} go build $(shell go list -f '{{ .Dir }}' ./... )
