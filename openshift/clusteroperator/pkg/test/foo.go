@@ -3,16 +3,17 @@ package test
 import (
 	"time"
 
+	"github.com/jewzaam/blogs/openshift/clusteroperator/pkg/operatorclient"
 	configv1 "github.com/openshift/api/config/v1"
-	"github.com/openshift/library-go/pkg/controller/controllercmd"
-	"github.com/openshift/library-go/pkg/operator/status"
 
 	configclient "github.com/openshift/client-go/config/clientset/versioned"
 	configinformers "github.com/openshift/client-go/config/informers/externalversions"
-	operatorversionedclient "github.com/openshift/client-go/operator/clientset/versioned"
 
-	operatorv1client "github.com/openshift/client-go/operator/clientset/versioned/typed/operator/v1"
-	operatorv1informers "github.com/openshift/client-go/operator/informers/externalversions"
+	operatorversionedclient "github.com/openshift/client-go/operator/clientset/versioned"
+	operatorinformers "github.com/openshift/client-go/operator/informers/externalversions"
+
+	"github.com/openshift/library-go/pkg/controller/controllercmd"
+	"github.com/openshift/library-go/pkg/operator/status"
 )
 
 const (
@@ -26,11 +27,7 @@ const (
 	clusterOperatorName string = "my-operator"
 )
 
-type OperatorClient struct {
-	Informers operatorv1informers.SharedInformerFactory
-	Client    operatorv1client.ConsolesGetter
-}
-
+// RunOperator - run the operator
 func RunOperator(ctx *controllercmd.ControllerContext) error {
 	// resync frequency for ClusterOperator
 	operatorResync := 10 * time.Minute
@@ -48,12 +45,17 @@ func RunOperator(ctx *controllercmd.ControllerContext) error {
 		return err
 	}
 
-	operatorConfigInformers := configinformers.NewSharedInformerFactoryWithOptions(
+	configInformers := configinformers.NewSharedInformerFactoryWithOptions(
 		configClient,
 		operatorResync,
 	)
 
-	operatorClient := &OperatorClient{
+	operatorConfigInformers := operatorinformers.NewSharedInformerFactoryWithOptions(
+		operatorConfigClient,
+		operatorResync,
+	)
+
+	operatorClient := &operatorclient.OperatorClient{
 		Informers: operatorConfigInformers,
 		Client:    operatorConfigClient.OperatorV1(),
 	}
@@ -66,9 +68,13 @@ func RunOperator(ctx *controllercmd.ControllerContext) error {
 		clusterOperatorName,
 		relatedObjects,
 		configClient.ConfigV1(),
-		operatorConfigInformers.Config().V1().ClusterOperators(),
+		configInformers.Config().V1().ClusterOperators(),
 		operatorClient,
 		versionGetter,
 		ctx.EventRecorder,
 	)
+
+	go clusterOperatorStatus.Run(1, ctx.Done())
+
+	return nil
 }
