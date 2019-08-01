@@ -18,6 +18,8 @@ gomodhack:
 	GO111MODULE=on go get -d github.com/openshift/client-go/config/informers/externalversions/config/v1@master
 	GO111MODULE=on go get -d github.com/openshift/client-go/config/listers/config/v1@master
 	GO111MODULE=on go get -d github.com/openshift/client-go/operator/clientset/versioned@master
+	GO111MODULE=on go get -d k8s.io/client-go@master
+	GO111MODULE=on go get -d k8s.io/apiserver@master
 
 .PHONY: gomodtidy
 gomodtidy:

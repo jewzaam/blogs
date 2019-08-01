@@ -23,10 +23,9 @@ require (
 	golang.org/x/net v0.0.0-20190724013045-ca1201d0de80 // indirect
 	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45 // indirect
 	golang.org/x/time v0.0.0-20190308202827-9d24e82272b4 // indirect
-	google.golang.org/appengine v1.5.0 // indirect
 	k8s.io/apiextensions-apiserver v0.0.0-20190731184107-91cdd51c95ef // indirect
 	k8s.io/apiserver v0.0.0-20190731183547-1a26677acad1 // indirect
-	k8s.io/client-go v11.0.0+incompatible
+	k8s.io/client-go v0.0.0-20190731143132-de47f833b8db
 	k8s.io/klog v0.3.3 // indirect
 	k8s.io/kube-aggregator v0.0.0-20190731144012-151550152f90 // indirect
 	k8s.io/utils v0.0.0-20190801114015-581e00157fb1 // indirect
