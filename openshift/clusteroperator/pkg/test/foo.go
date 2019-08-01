@@ -3,7 +3,9 @@ package test
 import (
 	"time"
 
+	"github.com/jewzaam/blogs/openshift/clusteroperator/config"
 	"github.com/jewzaam/blogs/openshift/clusteroperator/pkg/operatorclient"
+
 	configv1 "github.com/openshift/api/config/v1"
 
 	configclient "github.com/openshift/client-go/config/clientset/versioned"
@@ -16,24 +18,13 @@ import (
 	"github.com/openshift/library-go/pkg/operator/status"
 )
 
-const (
-	// operator's name
-	operatorName string = "my-operator-name"
-	// operator's namespace
-	operatorNamespace string = "my-operator-namespace"
-	// operator's version
-	operatorVersion string = "0.0.1"
-	// clusteroperator's name
-	clusterOperatorName string = "my-operator"
-)
-
 // RunOperator - run the operator
 func RunOperator(ctx *controllercmd.ControllerContext) error {
 	// resync frequency for ClusterOperator
 	operatorResync := 10 * time.Minute
 
 	versionGetter := status.NewVersionGetter()
-	versionGetter.SetVersion("operator", operatorVersion)
+	versionGetter.SetVersion("operator", config.OperatorVersion)
 
 	configClient, err := configclient.NewForConfig(ctx.KubeConfig)
 	if err != nil {
@@ -61,11 +52,11 @@ func RunOperator(ctx *controllercmd.ControllerContext) error {
 	}
 
 	relatedObjects := []configv1.ObjectReference{
-		{Resource: "namespaces", Name: operatorNamespace},
+		{Resource: "namespaces", Name: config.OperatorNamespace},
 	}
 
 	clusterOperatorStatus := status.NewClusterOperatorStatusController(
-		clusterOperatorName,
+		config.ClusterOperatorName,
 		relatedObjects,
 		configClient.ConfigV1(),
 		configInformers.Config().V1().ClusterOperators(),

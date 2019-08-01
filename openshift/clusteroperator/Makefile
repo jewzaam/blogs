@@ -8,7 +8,6 @@ Gopkg.lock:
 	rm -f Gopkg.toml
 	dep init
 
-.PHONY: vendor
 vendor: Gopkg.lock
 	dep ensure -v
 
@@ -22,5 +21,5 @@ gotest:
 	go test $(TESTOPTS) $(TESTTARGETS)
 
 .PHONY: gobuild
-gobuild: gocheck gotest
+gobuild: vendor gocheck gotest
 	go build $(shell go list -f '{{ .Dir }}' ./... )
