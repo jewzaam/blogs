@@ -6,17 +6,16 @@ default: gobuild
 
 .PHONY: vendor
 vendor:
-	dep init
 	dep ensure -v
 
 .PHONY: gocheck
 gocheck:
-    gofmt -s -l $(shell go list -f '{{ .Dir }}' ./... ) | grep ".*\.go"; if [ "$$?" = "0" ]; then gofmt -s -d $(shell go list -f '{{ .Dir }}' ./... ); exit 1; fi
-    go vet ./cmd/... ./pkg/...
+	gofmt -s -w $(shell go list -f '{{ .Dir }}' ./... )
+	go vet ./pkg/...
 
 .PHONY: gotest
 gotest:
-    go test $(TESTOPTS) $(TESTTARGETS)
+	go test $(TESTOPTS) $(TESTTARGETS)
 
 .PHONY: gobuild
 gobuild: gocheck gotest
